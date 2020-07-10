@@ -14,6 +14,12 @@ class CrimeData():
             year, self.getDataFrame().head())
         return string
 
+    def clean(self):
+        pass
+
+    def eachCrime(self):
+        return self.getDataFrame().text_general_code.value_counts()
+
     def getFile(self):
         return self.file
 
@@ -25,4 +31,4 @@ class CrimeData():
 
 
 if __name__ == "__main__":
-    print(CrimeData())
+    print(CrimeData().eachCrime())
