@@ -12,8 +12,13 @@ function initMap() {
     });
 
     let marker = crimeMarker(39.96233372, -75.16144594);
-    google.maps.event.addListener(marker, "click", () => {
-        infowindow("<strong>Testing message</strong><br>Yes").open(map, marker);
+    let crime = "Aggravated Assault";
+    let time = "18:12:00";
+    let location = "600 BLOCK WADSWORTH AV";
+    let info = `<b>${location}</b><br>${crime}<br> ${time}`;
+    
+    marker.addListener("click", () => {
+        infowindow(info).open(map, marker);
     });
 }
 
