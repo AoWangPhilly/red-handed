@@ -16,22 +16,19 @@ function initMap() {
     let time = "18:12:00";
     let location = "600 BLOCK WADSWORTH AV";
     let info = `<b>${location}</b><br>${crime}<br> ${time}`;
-    
+
     marker.addListener("click", () => {
         infowindow(info).open(map, marker);
     });
 }
 
-const crimeMarker = (lat, lng) => {
-    return new google.maps.Marker({
-        position: new google.maps.LatLng(lat, lng),
-        map: map,
-        title: "Test point"
-    });
-}
+const crimeMarker = (lat, lng) => new google.maps.Marker({
+    position: new google.maps.LatLng(lat, lng),
+    map: map,
+    title: "Test point"
+});
 
-const infowindow = (content) => {
-    return new google.maps.InfoWindow({
-        content: content
-    });
-}
+
+const infowindow = content => new google.maps.InfoWindow({
+    content: content
+});
