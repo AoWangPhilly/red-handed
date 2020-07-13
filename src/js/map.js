@@ -14,20 +14,23 @@ function initMap() {
     d3.csv("src/data/cleanedincidents2020.csv").then(data => {
         let markers = [];
         for (let crime of data) {
-            let marker = crimeMarker(crime.lat, crime.lng);
-            markers.push(marker);
+            let date = new Date(crime.dispatch_date_time);
+            if (date.getMonth() == 1 && date.getDay() == 1){
+                let marker = crimeMarker(crime.lat, crime.lng);
+                markers.push(marker);
 
-            const {
-                text_general_code: type,
-                dispatch_date_time: time,
-                location_block: location
-            } = crime;
-            
-            let info = `<b>${location}</b><br>${type}<br> ${time}`;
+                const {
+                    text_general_code: type,
+                    dispatch_date_time: time,
+                    location_block: location
+                } = crime;
 
-            marker.addListener("click", () => {
-                infowindow(info).open(map, marker);
-            });
+                let info = `<b>${location}</b><br>${type}<br> ${time}`;
+
+                marker.addListener("click", () => {
+                    infowindow(info).open(map, marker);
+                });
+            }
         }
         let markerCluster = new MarkerClusterer(map, markers, {
             imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
