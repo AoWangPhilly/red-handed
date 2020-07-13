@@ -11,15 +11,16 @@ function initMap() {
         zoom: 14
     });
 
-    let marker = crimeMarker(39.96233372, -75.16144594);
-    let crime = "Aggravated Assault";
-    let time = "18:12:00";
-    let location = "600 BLOCK WADSWORTH AV";
-    let info = `<b>${location}</b><br>${crime}<br> ${time}`;
+    // let marker = crimeMarker(39.96233372, -75.16144594);
+    // let crime = "Aggravated Assault";
+    // let time = "18:12:00";
+    // let location = "600 BLOCK WADSWORTH AV";
+    // let info = `<b>${location}</b><br>${crime}<br> ${time}`;
 
-    marker.addListener("click", () => {
-        infowindow(info).open(map, marker);
-    });
+    // marker.addListener("click", () => {
+    //     infowindow(info).open(map, marker);
+    // });
+    map.data.loadGeoJson('src/data/2006.json');
 }
 
 const crimeMarker = (lat, lng) => new google.maps.Marker({
