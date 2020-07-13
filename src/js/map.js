@@ -11,16 +11,28 @@ function initMap() {
         zoom: 14
     });
 
-    // let marker = crimeMarker(39.96233372, -75.16144594);
-    // let crime = "Aggravated Assault";
-    // let time = "18:12:00";
-    // let location = "600 BLOCK WADSWORTH AV";
-    // let info = `<b>${location}</b><br>${crime}<br> ${time}`;
+    d3.csv("src/data/cleanedincidents2020.csv").then(data => {
+        let markers = [];
+        for (let crime of data) {
+            let marker = crimeMarker(crime.lat, crime.lng);
+            markers.push(marker);
 
-    // marker.addListener("click", () => {
-    //     infowindow(info).open(map, marker);
-    // });
-    map.data.loadGeoJson('src/data/2006.json');
+            const {
+                text_general_code: type,
+                dispatch_date_time: time,
+                location_block: location
+            } = crime;
+            
+            let info = `<b>${location}</b><br>${type}<br> ${time}`;
+
+            marker.addListener("click", () => {
+                infowindow(info).open(map, marker);
+            });
+        }
+        let markerCluster = new MarkerClusterer(map, markers, {
+            imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+        });
+    });
 }
 
 const crimeMarker = (lat, lng) => new google.maps.Marker({
