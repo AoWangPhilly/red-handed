@@ -5,10 +5,10 @@ let map;
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
         center: {
-            lat: 39.9509,
-            lng: -75.1875
+            lat: 39.9909,
+            lng: -75.1115
         },
-        zoom: 14
+        zoom: 11
     });
 
     d3.csv("src/data/cleanedincidents2020.csv").then(data => {
