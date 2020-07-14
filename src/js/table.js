@@ -20,10 +20,6 @@ d3.csv("src/data/cleanedincidents2020.csv").then(data => {
     }
     $(document).ready(() => {
         $('#datatable').DataTable({
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ],
             data: monthData,
             columns: [{
                     title: "#"
@@ -48,6 +44,10 @@ d3.csv("src/data/cleanedincidents2020.csv").then(data => {
                 {
                     title: "lng"
                 }
+            ],
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
             ],
         });
     });
