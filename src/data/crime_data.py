@@ -22,6 +22,9 @@ class CrimeData():
         self.file = file
         self.df = pd.read_csv(file)
 
+    def __len__(self):
+        return len(self.clean())
+        
     def __str__(self):
         """Prints out the file name and shows the beginning of the dataframe"""
         idx = self.getFile().find("20")
