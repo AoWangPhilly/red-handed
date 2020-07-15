@@ -6,6 +6,9 @@ from crime_data import CrimeData
 from os import listdir
 from os.path import isfile, join
 import json
+from pprint import pprint
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
 
 class Dashboard():
@@ -16,11 +19,11 @@ class Dashboard():
         self.files = files
         dataframes = {}
 
-        for file in self.files:
+        for file in sorted(self.files):
             idx = file.find("20")
-            year = file[idx:idx+4]
-            dataframes[year] = CrimeData(file)
-            
+            year = int(file[idx:idx+4])
+            dataframes[year] = CrimeData(file).clean()
+
         self.dataframes = dataframes
 
     def __str__(self):
@@ -72,10 +75,28 @@ class Dashboard():
         with open(name, "w") as j:
             j.dump(data, name)
 
+    def predictCrime(self, year):
+        crime = self.totalCrimePerYear()
+        numCrime = list(crime.values())[:len(crime)-1]
+        years = list(crime.keys())[:len(crime)-1]
+        x = np.array(years).reshape((-1, 1))
+        y = np.array(numCrime)
+
+        model = LinearRegression()
+        model.fit(x, y)
+        model = LinearRegression().fit(x, y)
+
+        r_sq = model.score(x, y)
+        print('coefficient of determination:', r_sq)
+        print('intercept:', model.intercept_)
+        print('slope:', model.coef_)
+        return model.predict([[year]])
+
 
 if __name__ == "__main__":
     dir = "src/data/cleaned"
     files = ["{}/{}".format(dir, f)
              for f in listdir(dir) if isfile(join(dir, f))]
     d = Dashboard(files)
-    print(d)
+    # pprint(d.totalCrimePerYear())
+    print(d.predictCrime())
