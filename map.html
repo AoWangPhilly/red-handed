@@ -48,15 +48,13 @@
     <script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.print.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.dataTables.min.css">
-    <script src="http://yui.yahooapis.com/3.18.1/build/yui/yui-min.js"></script>
     <script src="src/js/table.js"></script>
-
     <!--./JS-->
 </head>
 
 <body>
-    <div class="container-fluid">
-        <h1 class="title">RedHanded</h1>
+    <div class="container">
+        <h1 class="title text-danger">RedHanded</h1>
         <div class="row">
             <div class="col-sm-8">
                 <div class="card">
@@ -69,25 +67,55 @@
             <div class="col-sm-4">
                 <div class="card text-white bg-danger">
                     <div class="card-header">
-                        <h2>Calendar</h2>
+                        <h2>📅 Pick a Date</h2>
                     </div>
-                    <div class="card-body">Today's date is: </div>
+                    <div class="card-body">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Year
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Month
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Day
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Action</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </div>
+                    </div>
                     <table>
                     </table>
                 </div>
                 <br>
                 <div class="card">
                     <div class="card-header">
-                        <h2>Top Five Crimes</h2>
+                        <h2>👮 Top Five Crimes</h2>
                     </div>
                     <div class="card-body">
-                        <ul class="list-group">
-                            <li class="list-group-item">H</li>
-                            <li class="list-group-item">E</li>
-                            <li class="list-group-item">L</li>
-                            <li class="list-group-item">L</li>
-                            <li class="list-group-item">O</li>
-                        </ul>
+                        <ol class="list-group">
+                            <li class="list-group-item">1. </li>
+                            <li class="list-group-item">2. </li>
+                            <li class="list-group-item">3. </li>
+                            <li class="list-group-item">4. </li>
+                            <li class="list-group-item">5. </li>
+                        </ol>
                         <br>
                         <a href="dashboard.html">
                             <button type="button" class="btn btn-outline-danger btn-lg">Dashboard</button>
