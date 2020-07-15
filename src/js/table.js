@@ -1,5 +1,5 @@
 // https://metadata.phila.gov/#home/datasetdetails/5543868920583086178c4f8e/representationdetails/570e7621c03327dc14f4b68d/
-d3.csv("src/data/cleanedincidents2020.csv").then(data => {
+d3.csv("src/data/cleaned/cleanedincidents2020.csv").then(data => {
     let monthData = [];
     for (const [index, crime] of data.entries()) {
         let date = new Date(crime.dispatch_date_time);

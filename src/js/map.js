@@ -11,7 +11,7 @@ function initMap() {
         zoom: 11
     });
 
-    d3.csv("src/data/cleanedincidents2020.csv").then(data => {
+    d3.csv("src/data/cleaned/cleanedincidents2020.csv").then(data => {
         let markers = [];
         // let crimeDict = {};
         // let dayCount = 0;
