@@ -15,13 +15,32 @@
 
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <!--D3 library-->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <!--Chartjs-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+    <!--Font-aweseome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Dashboard</title>
 </head>
 
 <body>
     <div class="container">
-        <h1>Dashboard</h1>
+        <h1 class="text-danger">Dashboard</h1>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fa fa-area-chart"></i> Philadelphia Crime Area Chart
+            </div>
+            <div class="card-body">
+                <canvas id="crimeOverYear"></canvas>
+            </div>
+        </div>
     </div>
+    <script src="src/js/dashboard.js"></script>
 </body>
 
 </html>
