@@ -18,7 +18,7 @@ class CrimeData():
     file : str
            The crime CSV filename
     """
-    def __init__(self, file="incidents2020.csv"):
+    def __init__(self, file="src/data/dirty/incidents2020.csv"):
         self.file = file
         self.df = pd.read_csv(file)
 
@@ -31,6 +31,11 @@ class CrimeData():
         return string
 
     def clean(self):
+        """[summary]
+
+        Returns:
+            [type]: [description]
+        """
         # Drops any missing crime data
         cleaned = self.df.dropna()
 
@@ -43,6 +48,11 @@ class CrimeData():
         return cleaned
 
     def eachCrime(self):
+        """[summary]
+
+        Returns:
+            [type]: [description]
+        """
         return self.getDataFrame().text_general_code.value_counts()
 
     def getFile(self):
@@ -57,9 +67,10 @@ class CrimeData():
 
 
 if __name__ == "__main__":
-    for year in range(2006, 2021):
-        fileName = "incidents{}.csv".format(year)
-        print("Cleaning Crime Data: {}".format(year))
-        crime = CrimeData(fileName)
-        crime.clean().to_csv("cleaned{}".format(fileName))
-        print("Saved Crime Data: {}".format(year))
+    # for year in range(2006, 2021):
+    #     fileName = "incidents{}.csv".format(year)
+    #     print("Cleaning Crime Data: {}".format(year))
+    #     crime = CrimeData(fileName)
+    #     crime.clean().to_csv("cleaned{}".format(fileName))
+    #     print("Saved Crime Data: {}".format(year))
+    print(CrimeData())
