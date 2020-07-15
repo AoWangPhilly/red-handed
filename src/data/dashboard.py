@@ -60,7 +60,7 @@ class Dashboard():
         Returns:
             [type]: [description]
         """
-        return self.dataframes.year.text_general_code.count_values()
+        return self.dataframes[year].text_general_code.value_counts()
 
     def weatherCorrelation(self):
         pass
@@ -73,12 +73,20 @@ class Dashboard():
             name ([type]): [description]
         """
         with open(name, "w") as j:
-            j.dump(data, name)
+            json.dump(data, j)
 
     def predictCrime(self, year):
+        """[summary]
+
+        Args:
+            year ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         crime = self.totalCrimePerYear()
-        numCrime = list(crime.values())[:len(crime)-1]
-        years = list(crime.keys())[:len(crime)-1]
+        numCrime = list(crime.values())
+        years = list(crime.keys())
         x = np.array(years).reshape((-1, 1))
         y = np.array(numCrime)
 
@@ -90,13 +98,20 @@ class Dashboard():
         print('coefficient of determination:', r_sq)
         print('intercept:', model.intercept_)
         print('slope:', model.coef_)
-        return model.predict([[year]])
+        return np.ceil(model.predict([[year]]))
 
 
 if __name__ == "__main__":
     dir = "src/data/cleaned"
-    files = ["{}/{}".format(dir, f)
-             for f in listdir(dir) if isfile(join(dir, f))]
+    files = sorted(["{}/{}".format(dir, f)
+             for f in listdir(dir) if isfile(join(dir, f))])
+    files = files[:len(files)-1]
     d = Dashboard(files)
-    # pprint(d.totalCrimePerYear())
-    print(d.predictCrime())
+    print(d)
+    pprint(d.totalCrimePerYear())
+    crime = d.totalCrimePerYear()
+    crime[2020] = d.predictCrime(2020)[0]
+    pprint(crime)
+    d.saveAsJSON(crime, "src/data/dashboard/crimePerYear.json")
+    print(d.predictCrime(2020))
+    # pprint(d.typeOfCrimePerYear())
