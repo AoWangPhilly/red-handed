@@ -65,6 +65,12 @@ class Dashboard():
     def weatherCorrelation(self):
         pass
 
+    def totalCrimesPerMonth(self, year):
+        return {}
+    
+    def totalCrimesPerMonthEachYear(self):
+        pass
+
     def saveAsJSON(self, data, name):
         """[summary]
 

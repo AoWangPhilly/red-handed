@@ -9,7 +9,7 @@ d3.json("src/data/dashboard/crimePerYear.json").then(crime => {
             labels: Object.keys(crime),
             datasets: [{
                 label: 'Philadelphia Crime (2006-2020)',
-                backgroundColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgb(255, 99, 132, 0.2)',
                 borderColor: 'rgb(255, 99, 132)',
                 data: Object.values(crime)
             }]
