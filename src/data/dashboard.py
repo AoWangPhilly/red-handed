@@ -9,6 +9,8 @@ import json
 from pprint import pprint
 import numpy as np
 from sklearn.linear_model import LinearRegression
+import pandas as pd
+# from numpyencoder import NumpyEncoder
 
 
 class Dashboard():
@@ -66,10 +68,20 @@ class Dashboard():
         pass
 
     def totalCrimesPerMonth(self, year):
-        return {}
-    
+        numToMonth = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
+                      7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"}
+        df = self.dataframes[year]
+        df.dispatch_date_time = pd.to_datetime(df.dispatch_date_time)
+        m = df.dispatch_date_time.dt.month
+        return {numToMonth.get(month): int(m[m == month].count()) for month in range(1, 12)}
+
     def totalCrimesPerMonthEachYear(self):
-        pass
+        """[summary]
+
+        Returns:
+            [type]: [description]
+        """
+        return {year: self.totalCrimesPerMonth(year) for year in self.dataframes}
 
     def saveAsJSON(self, data, name):
         """[summary]
@@ -110,14 +122,20 @@ class Dashboard():
 if __name__ == "__main__":
     dir = "src/data/cleaned"
     files = sorted(["{}/{}".format(dir, f)
-             for f in listdir(dir) if isfile(join(dir, f))])
+                    for f in listdir(dir) if isfile(join(dir, f))])
     files = files[:len(files)-1]
+
     d = Dashboard(files)
-    print(d)
-    pprint(d.totalCrimePerYear())
-    crime = d.totalCrimePerYear()
-    crime[2020] = d.predictCrime(2020)[0]
-    pprint(crime)
-    d.saveAsJSON(crime, "src/data/dashboard/crimePerYear.json")
-    print(d.predictCrime(2020))
+    # crimeDict = d.countEachCrime(2019)
+    # pprint(dict(crimeDict))
+    # d.saveAsJSON(crimeDict, "src/data/dashboard/typeOfCrimes2019.json")
+    # print(d.countEachCrime(2019))
+    month = d.totalCrimesPerMonth(2019)
+    d.saveAsJSON(month, "src/data/dashboard/monthlyCrime.json")
+    # pprint(d.totalCrimePerYear())
+    # crime = d.totalCrimePerYear()
+    # crime[2020] = d.predictCrime(2020)[0]
+    # pprint(crime)
+    # d.saveAsJSON(crime, "src/data/dashboard/crimePerYear.json")
+    # print(d.predictCrime(2020))
     # pprint(d.typeOfCrimePerYear())
