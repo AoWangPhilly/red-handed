@@ -10,6 +10,7 @@ from pprint import pprint
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import pandas as pd
+import geopy
 # from numpyencoder import NumpyEncoder
 
 
@@ -116,6 +117,8 @@ class Dashboard():
         print('slope:', model.coef_)
         return np.ceil(model.predict([[year]]))
 
+    def getZipcode(self, geolocator):
+        location = geolocator.reverse(self.dataframes)
 
 if __name__ == "__main__":
     dir = "src/data/cleaned"

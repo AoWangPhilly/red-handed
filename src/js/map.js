@@ -139,7 +139,8 @@ function initMap() {
         let markers = [];
         // let crimeDict = {};
         // let dayCount = 0;
-        for (let crime of data) {
+        for (let i = 0; i < data.length; i++) {
+            let crime = data[i];
             let date = new Date(crime.dispatch_date_time);
             if (date.getMonth() == 1 && date.getDay() == 1) {
                 let marker = crimeMarker(crime.lat, crime.lng);
