@@ -24,6 +24,5 @@ const scrapeNews = async url => {
 
 let x = scrapeNews("https://6abc.com/tag/crime/");
 (async () => {
-    let [link, h1, href] = (await x);
-    console.log(link);
+     console.log((await x));
 })()
