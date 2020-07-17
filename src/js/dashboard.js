@@ -50,7 +50,7 @@ d3.json("src/data/dashboard/monthlyCrime.json").then(crime => {
             labels: Object.keys(crime),
             datasets: [{
                 label: "Crime Count Each Month (2019)",
-                backgroundColor: 'rgb(255, 0, 0, 0.5)',
+                backgroundColor: 'rgb(255, 0, 0, 0.70)',
                 data: Object.values(crime)
             }]
         },
@@ -93,12 +93,12 @@ const dynamicColors = () => {
     let r = 255;
     let g = Math.floor(Math.random() * 100);
     let b = Math.floor(Math.random() * 100);
-    return "rgba(" + r + "," + g + "," + b + ", 0.8)";
+    return `rgba(${r}, ${g}, ${b}, 0.8)`;
 }
 
-const poolColors = a => {
+const poolColors = arr => {
     let pool = [];
-    for (let i = 0; i < a.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         pool.push(dynamicColors());
     }
     return pool;
