@@ -108,8 +108,6 @@ class Dashboard():
         x = np.array(years).reshape((-1, 1))
         y = np.array(numCrime)
 
-        model = LinearRegression()
-        model.fit(x, y)
         model = LinearRegression().fit(x, y)
 
         r_sq = model.score(x, y)

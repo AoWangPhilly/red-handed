@@ -15,15 +15,30 @@ d3.json("src/data/dashboard/crimePerYear.json").then(crime => {
                 pointBorderWidth: 2,
                 pointHitRadius: 20,
                 pointBorderColor: "rgba(255,255,255,0.8)",
-                pointBackgroundColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgb(255, 99, 132, 0.2)',
-                borderColor: 'rgb(255, 99, 132)',
-                data: Object.values(crime)
+                pointBackgroundColor: 'rgb(255, 0, 0)',
+                backgroundColor: 'rgb(255, 0, 0, 0.5)',
+                borderColor: 'rgb(255, 50, 50)',
+                data: Object.values(crime),
             }]
         },
 
         // Configuration options go here
-        options: {}
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Number of Crimes"
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Years"
+                    }
+                }]
+            }
+        }
     });
 });
 
@@ -35,11 +50,26 @@ d3.json("src/data/dashboard/monthlyCrime.json").then(crime => {
             labels: Object.keys(crime),
             datasets: [{
                 label: "Crime Count Each Month (2019)",
-                backgroundColor: 'rgb(255, 99, 132, 0.5)',
+                backgroundColor: 'rgb(255, 0, 0, 0.5)',
                 data: Object.values(crime)
             }]
         },
-        options: {}
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Number of Crimes"
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Months"
+                    }
+                }]
+            }
+        }
     });
 });
 
@@ -60,10 +90,10 @@ d3.json("src/data/dashboard/typeOfCrimes2019.json").then(crime => {
 });
 
 const dynamicColors = () => {
-    let r = Math.floor(Math.random() * 255) + 150;
-    let g = Math.floor(Math.random() * 255) - 100;
-    let b = Math.floor(Math.random() * 255) - 100;
-    return "rgba(" + r + "," + g + "," + b + ", 0.5)";
+    let r = 255;
+    let g = Math.floor(Math.random() * 100);
+    let b = Math.floor(Math.random() * 100);
+    return "rgba(" + r + "," + g + "," + b + ", 0.8)";
 }
 
 const poolColors = a => {
