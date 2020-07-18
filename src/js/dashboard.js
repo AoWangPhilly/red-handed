@@ -75,17 +75,42 @@ d3.json("src/data/dashboard/monthlyCrime.json").then(crime => {
 
 d3.json("src/data/dashboard/typeOfCrimes2019.json").then(crime => {
     let ctx = document.getElementById('pie').getContext('2d');
+    let keys = Object.keys(crime);
+    keys.sort((a, b) => crime[b] - crime[a]);
+
+    let values = [];
+    let keyLength = keys.length;
+
+    for (let i = 0; i < keyLength; i++) {
+        values.push(crime[keys[i]]);
+    }
+
     let chart = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-            labels: Object.keys(crime),
+            labels: keys,
             datasets: [{
                 label: "Type of Crime Count(2019)",
                 backgroundColor: poolColors(Object.values(crime)),
-                data: Object.values(crime)
+                data: values
             }]
         },
-        options: {}
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Number of Crimes"
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Types of Crimes"
+                    }
+                }]
+            }
+        }
     });
 });
 
