@@ -74,7 +74,7 @@ class Dashboard():
         df = self.dataframes[year]
         df.dispatch_date_time = pd.to_datetime(df.dispatch_date_time)
         m = df.dispatch_date_time.dt.month
-        return {numToMonth.get(month): int(m[m == month].count()) for month in range(1, 12)}
+        return {numToMonth.get(month): int(m[m == month].count()) for month in range(1, 13)}
 
     def totalCrimesPerMonthEachYear(self):
         """[summary]
