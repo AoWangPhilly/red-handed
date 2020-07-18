@@ -172,3 +172,16 @@ const crimeMarker = (lat, lng) => new google.maps.Marker({
 const infowindow = content => new google.maps.InfoWindow({
     content: content
 });
+
+const getTopFiveCrimes = () => {
+    d3.json("src/data/dashboard/typeOfCrimes2019.json").then(crime => {
+        let list = "";
+        let crimes = Object.keys(crime);
+        for (let i = 0; i < 5; i++) {
+            list += ` <li class="list-group-item">${i+1}. ${crimes[i]}</li>`
+        }
+        document.getElementById("topcrime").innerHTML = list;
+    });
+}
+
+getTopFiveCrimes();
