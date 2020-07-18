@@ -127,16 +127,17 @@ if __name__ == "__main__":
     files = files[:len(files)-1]
 
     d = Dashboard(files)
-    # crimeDict = d.countEachCrime(2019)
+    
     # pprint(dict(crimeDict))
     # d.saveAsJSON(crimeDict, "src/data/dashboard/typeOfCrimes2019.json")
     # print(d.countEachCrime(2019))
-    month = d.totalCrimesPerMonth(2019)
-    d.saveAsJSON(month, "src/data/dashboard/monthlyCrime.json")
-    # pprint(d.totalCrimePerYear())
+
+    # Total crimes each month in 2019
+    # month = d.totalCrimesPerMonth(2019)
+    # d.saveAsJSON(month, "src/data/dashboard/monthlyCrime.json")
+
+    # Total crimes 2006-2020
     # crime = d.totalCrimePerYear()
     # crime[2020] = d.predictCrime(2020)[0]
-    # pprint(crime)
     # d.saveAsJSON(crime, "src/data/dashboard/crimePerYear.json")
-    # print(d.predictCrime(2020))
-    # pprint(d.typeOfCrimePerYear())
+
