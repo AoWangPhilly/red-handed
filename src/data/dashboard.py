@@ -10,8 +10,8 @@ from pprint import pprint
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import pandas as pd
-import geopy
-# from numpyencoder import NumpyEncoder
+from numpyencoder import NumpyEncoder
+from uszipcode import SearchEngine, Zipcode
 
 
 class Dashboard():
@@ -65,9 +65,6 @@ class Dashboard():
         """
         return self.dataframes[year].text_general_code.value_counts()
 
-    def weatherCorrelation(self):
-        pass
-
     def totalCrimesPerMonth(self, year):
         numToMonth = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
                       7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"}
@@ -92,7 +89,7 @@ class Dashboard():
             name ([type]): [description]
         """
         with open(name, "w") as j:
-            json.dump(data, j)
+            json.dump(data, j, cls=NumpyEncoder)
 
     def predictCrime(self, year):
         """[summary]
@@ -117,20 +114,46 @@ class Dashboard():
         print('slope:', model.coef_)
         return np.ceil(model.predict([[year]]))
 
-    def getZipcode(self, geolocator):
-        location = geolocator.reverse(self.dataframes)
+    def getZipcode(self, lat, lng):
+        search = SearchEngine()
+        return search.by_coordinates(lat, lng)[0].zipcode
+
+    def addZipcodeCol(self, year):
+        crimes = self.dataframes[year]
+        crimes["zipcode"] = crimes.apply(
+            lambda crime: self.getZipcode(crime.lat, crime.lng), axis=1)
+        crimes.to_csv(
+            "/Users/aowang/red-handed/src/data/cleaned/cleanedincidents{}.csv".format(year))
+
+    def crimesPerZipcode(self, year):
+        return self.dataframes[year].zipcode.value_counts()
+
+    # population_density
+
+    def crimePopDensity(self, year):
+        zipcodes = self.crimesPerZipcode(year).keys()
+        search = SearchEngine()
+        return {zipcode: search.by_prefix(zipcode).population_density for zipcode in zipcodes}
+
+    # median_household_income
+    def crimeHouseHoldIncome(self, year):
+        zipcodes = self.crimesPerZipcode(year).keys()
+        search = SearchEngine()
+        return {zipcode: search.by_prefix(zipcode).median_household_income for zipcode in zipcodes}
+
 
 if __name__ == "__main__":
-    dir = "src/data/cleaned"
+    dir = "/Users/aowang/red-handed/src/data/cleaned"
     files = sorted(["{}/{}".format(dir, f)
                     for f in listdir(dir) if isfile(join(dir, f))])
     files = files[:len(files)-1]
 
     d = Dashboard(files)
-    
-    # pprint(dict(crimeDict))
-    # d.saveAsJSON(crimeDict, "src/data/dashboard/typeOfCrimes2019.json")
-    # print(d.countEachCrime(2019))
+    d.addZipcodeCol(2019)
+
+    # crimeDict = dict(d.countEachCrime(2019))
+    # d.saveAsJSON(
+    #     crimeDict, "/Users/aowang/red-handed/src/data/dashboard/typeOfCrimes2019.json")
 
     # Total crimes each month in 2019
     # month = d.totalCrimesPerMonth(2019)
@@ -140,4 +163,3 @@ if __name__ == "__main__":
     # crime = d.totalCrimePerYear()
     # crime[2020] = d.predictCrime(2020)[0]
     # d.saveAsJSON(crime, "src/data/dashboard/crimePerYear.json")
-
