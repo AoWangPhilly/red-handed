@@ -1,3 +1,5 @@
+"use strict";
+
 d3.json("src/data/dashboard/crimePerYear.json").then(crime => {
     let ctx = document.getElementById('crimeOverYear').getContext('2d');
     let chart = new Chart(ctx, {
@@ -128,3 +130,109 @@ const poolColors = arr => {
     }
     return pool;
 }
+
+d3.json("src/data/dashboard/zipcodeCrime.json").then(crime => {
+    let ctx = document.getElementById('zipcode').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: Object.keys(crime),
+            datasets: [{
+                label: "Crime Count in Each Zipcode(2019)",
+                backgroundColor: 'rgb(255, 0, 0, 0.70)',
+                data: Object.values(crime)
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Number of Crimes"
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Zipcodes"
+                    }
+                }]
+            }
+        }
+    });
+});
+
+d3.json("src/data/dashboard/medianIncome.json").then(crime => {
+    console.log(crime);
+    let data = [];
+    for (let income in crime) {
+        data.push({
+            x: income,
+            y: crime[income]
+        })
+    }
+    let ctx = document.getElementById('income').getContext('2d');
+    let scatterChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Scatter Dataset',
+                backgroundColor: 'rgb(255, 0, 0, 0.70)',
+                data: data
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Number of Crimes"
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Median Household-Income per Zipcode"
+                    }
+                }]
+            }
+        }
+    });
+});
+
+d3.json("src/data/dashboard/populationDensity.json").then(crime => {
+    let data = [];
+    for (let pop in crime) {
+        data.push({
+            x: pop,
+            y: crime[pop]
+        })
+    }
+    let ctx = document.getElementById('density').getContext('2d');
+    let scatterChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Scatter Dataset',
+                backgroundColor: 'rgb(255, 0, 0, 0.70)',
+                data: data
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Number of Crimes"
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Population Density per Zipcode"
+                    }
+                }]
+            }
+        }
+    });
+});
