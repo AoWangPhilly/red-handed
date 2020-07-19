@@ -176,7 +176,7 @@ d3.json("src/data/dashboard/medianIncome.json").then(crime => {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Scatter Dataset',
+                label: 'Household Income (2019)',
                 backgroundColor: 'rgb(255, 0, 0, 0.70)',
                 data: data
             }]
@@ -213,7 +213,7 @@ d3.json("src/data/dashboard/populationDensity.json").then(crime => {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Scatter Dataset',
+                label: 'Population Density (2019)',
                 backgroundColor: 'rgb(255, 0, 0, 0.70)',
                 data: data
             }]
@@ -230,6 +230,37 @@ d3.json("src/data/dashboard/populationDensity.json").then(crime => {
                     scaleLabel: {
                         display: true,
                         labelString: "Population Density per Zipcode"
+                    }
+                }]
+            }
+        }
+    });
+});
+
+d3.json("src/data/dashboard/timesInCrime.json").then(crime => {
+    let ctx = document.getElementById('day').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: Object.keys(crime),
+            datasets: [{
+                label: "Frequency of Crime During the Day (2019)",
+                backgroundColor: 'rgb(255, 0, 0, 0.70)',
+                data: Object.values(crime)
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Number of Crimes"
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Times"
                     }
                 }]
             }

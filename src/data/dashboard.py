@@ -130,25 +130,67 @@ class Dashboard():
 
     # population_density
     def crimePopDensity(self, year):
-        zipcodes = self.crimesPerZipcode(year).keys()
+        series = self.crimesPerZipcode(year)
+        zipcodes = series.keys()
         search = SearchEngine()
         crimePop = {}
         for zipcode in zipcodes:
             popDensity = search.by_prefix(zipcode)[0].population_density
             if popDensity != None:
-                crimePop[zipcode] = popDensity
+                crimePop[series[zipcode]] = popDensity
+
+        crimePop = {int(key): int(crimePop[key]) for key in crimePop}
         return crimePop
 
     # median_household_income
     def crimeHouseHoldIncome(self, year):
-        zipcodes = self.crimesPerZipcode(year).keys()
+        series = self.crimesPerZipcode(year)
+        zipcodes = series.keys()
         search = SearchEngine()
         household = {}
         for zipcode in zipcodes:
             income = search.by_prefix(zipcode)[0].median_household_income
             if income != None:
-                household[zipcode] = income
+                household[series[zipcode]] = income
+        household = {int(key): int(household[key]) for key in household}
         return household
+
+    def determineTime(self, time):
+        hr, mins = time.hour, time.minute
+        # Morning 6 - 11:59
+        if hr > 5 and hr < 12:
+            return "Morning"
+
+        # Afternoon 12 - 17
+        elif hr > 11 and hr < 18:
+
+            # if 17:00 - Afternoon, but 17:## - Evening
+            if hr == 17:
+                if mins == 0:
+                    return "Afternoon"
+                return "Evening"
+            return "Afternoon"
+
+        # Evening 17:01 - 20
+        elif hr > 16 and hr < 21:
+            if hr == 20:
+                if min == 0:
+                    return "Evening"
+                return "Night"
+            return "Evening"
+
+        # Night 20:01 - 5:59
+        else:
+            return "Night"
+
+    def crimeDuringTimesOfDay(self, year):
+        timeOfDay = {"Morning": 0, "Afternoon": 0, "Evening": 0, "Night": 0}
+        df = self.dataframes[year]
+        df.dispatch_date_time = pd.to_datetime(df.dispatch_date_time)
+        for _, value in df.dispatch_date_time.items():
+            time = self.determineTime(value)
+            timeOfDay[time] = timeOfDay.get(time, 0) + 1
+        return timeOfDay
 
 
 if __name__ == "__main__":
@@ -158,14 +200,19 @@ if __name__ == "__main__":
     files = files[:len(files)-1]
 
     d = Dashboard(files)
+    times = d.crimeDuringTimesOfDay(2019)
+    d.saveAsJSON(
+        times, "/Users/aowang/red-handed/src/data/dashboard/timesInCrime.json")
     # zipcodeCrime = d.crimesPerZipcode(2019)
     # d.saveAsJSON(dict(zipcodeCrime),
     #              "/Users/aowang/red-handed/src/data/dashboard/zipcodeCrime.json")
 
-    pop = d.crimePopDensity(2019)
-    income = d.crimeHouseHoldIncome(2019)
-    d.saveAsJSON(pop, "/Users/aowang/red-handed/src/data/dashboard/populationDensity.json")
-    d.saveAsJSON(income, "/Users/aowang/red-handed/src/data/dashboard/medianIncome.json")
+    # pop = d.crimePopDensity(2019)
+    # income = d.crimeHouseHoldIncome(2019)
+    # d.saveAsJSON(
+    #     pop, "/Users/aowang/red-handed/src/data/dashboard/populationDensity.json")
+    # d.saveAsJSON(
+    #     income, "/Users/aowang/red-handed/src/data/dashboard/medianIncome.json")
 
     # crimeDict = dict(d.countEachCrime(2019))
     # d.saveAsJSON(
