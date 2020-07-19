@@ -129,17 +129,26 @@ class Dashboard():
         return self.dataframes[year].zipcode.value_counts()
 
     # population_density
-
     def crimePopDensity(self, year):
         zipcodes = self.crimesPerZipcode(year).keys()
         search = SearchEngine()
-        return {zipcode: search.by_prefix(zipcode).population_density for zipcode in zipcodes}
+        crimePop = {}
+        for zipcode in zipcodes:
+            popDensity = search.by_prefix(zipcode)[0].population_density
+            if popDensity != None:
+                crimePop[zipcode] = popDensity
+        return crimePop
 
     # median_household_income
     def crimeHouseHoldIncome(self, year):
         zipcodes = self.crimesPerZipcode(year).keys()
         search = SearchEngine()
-        return {zipcode: search.by_prefix(zipcode).median_household_income for zipcode in zipcodes}
+        household = {}
+        for zipcode in zipcodes:
+            income = search.by_prefix(zipcode)[0].median_household_income
+            if income != None:
+                household[zipcode] = income
+        return household
 
 
 if __name__ == "__main__":
@@ -149,7 +158,14 @@ if __name__ == "__main__":
     files = files[:len(files)-1]
 
     d = Dashboard(files)
-    d.addZipcodeCol(2019)
+    # zipcodeCrime = d.crimesPerZipcode(2019)
+    # d.saveAsJSON(dict(zipcodeCrime),
+    #              "/Users/aowang/red-handed/src/data/dashboard/zipcodeCrime.json")
+
+    pop = d.crimePopDensity(2019)
+    income = d.crimeHouseHoldIncome(2019)
+    d.saveAsJSON(pop, "/Users/aowang/red-handed/src/data/dashboard/populationDensity.json")
+    d.saveAsJSON(income, "/Users/aowang/red-handed/src/data/dashboard/medianIncome.json")
 
     # crimeDict = dict(d.countEachCrime(2019))
     # d.saveAsJSON(
