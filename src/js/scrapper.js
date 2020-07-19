@@ -19,10 +19,17 @@ const scrapeNews = async url => {
     const hrefTxt = await href.jsonValue();
 
     await browser.close();
-    return {srcTxt, rawTxt, hrefTxt};
+    return [srcTxt, rawTxt, hrefTxt];
 }
 
-let x = scrapeNews("https://6abc.com/tag/crime/");
+
+let info = scrapeNews("https://6abc.com/tag/crime/");
 (async () => {
-     console.log((await x));
+    let COTD = await info;
+    let fs = require('fs');
+    fs.writeFile("input.csv", COTD, function (err) {
+        if (err) {
+            console.log(err);
+        }
+    });
 })()
