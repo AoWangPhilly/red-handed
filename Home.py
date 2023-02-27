@@ -44,7 +44,7 @@ def get_all_crimes() -> Dict[int, pd.DataFrame]:
     return output
 
 
-crimes = get_all_crimes()
+# crimes = get_all_crimes()
 
 
 def get_top_n_crimes(df: pd.DataFrame, nth: int = 10):
@@ -66,13 +66,13 @@ def get_top_n_crimes(df: pd.DataFrame, nth: int = 10):
 
 st.write("# RedHanded :wave:")
 
-option = st.selectbox(
+year = st.selectbox(
     label="Select a year to analyze:",
     options=range(START_YEAR, END_YEAR+1),
     index=END_YEAR-START_YEAR
 )
 
-data = crimes[option]
+data = get_crime_by_year(year=year)
 fig = get_top_n_crimes(data)
 
 st.plotly_chart(fig, use_container_width=True)
