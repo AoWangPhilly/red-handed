@@ -8,20 +8,6 @@ START_YEAR = 2006
 END_YEAR = 2021
 
 
-@st.cache_data
-def get_crime_by_year(year: int) -> pd.DataFrame:
-    return pd.read_parquet(
-        join("data", f"NYPD_Complaint_Data_Historic_{year}.parquet"),
-        engine="fastparquet"
-    )
-
-
-@st.cache_data
-def get_all_crimes() -> Dict[int, pd.DataFrame]:
-    output = {year: get_crime_by_year(year) for year in range(START_YEAR, END_YEAR + 1)}
-    return output
-
-
 def rename_values(df: pd.DataFrame) -> pd.DataFrame:
     df.replace({
         'HARRASSMENT 2': 'HARASSMENT',
@@ -42,6 +28,20 @@ def rename_values(df: pd.DataFrame) -> pd.DataFrame:
         'M': 'MALE'
     }, inplace=True)
     return df
+
+
+@st.cache_data
+def get_crime_by_year(year: int) -> pd.DataFrame:
+    df = pd.read_parquet(
+        join("data", f"NYPD_Complaint_Data_Historic_{year}.parquet"),
+        engine="fastparquet"
+    )
+    return rename_values(df)
+
+
+def get_all_crimes() -> Dict[int, pd.DataFrame]:
+    output = {year: get_crime_by_year(year) for year in range(START_YEAR, END_YEAR + 1)}
+    return output
 
 
 crimes = get_all_crimes()
@@ -71,7 +71,8 @@ option = st.selectbox(
     options=range(START_YEAR, END_YEAR+1),
     index=END_YEAR-START_YEAR
 )
-data = rename_values(crimes[option])
+
+data = crimes[option]
 fig = get_top_n_crimes(data)
 
 st.plotly_chart(fig, use_container_width=True)
