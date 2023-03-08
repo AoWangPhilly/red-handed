@@ -18,7 +18,6 @@ from pyspark.sql.functions import (
 )
 from streamlit_folium import st_folium
 
-from Home import processedSDF
 
 
 @st.cache_resource
@@ -28,6 +27,8 @@ def initializeSpark() -> Tuple[SparkSession, SparkContext]:
     spark = SparkSession.builder.config(conf=conf).getOrCreate()
     return spark, spark.sparkContext
 
+spark, _ = initializeSpark()
+processedSDF = spark.read.load(path=join("data", "NYPD_Complaint_Data_Historic.parquet"), format="parquet")
 
 @st.cache_data
 def getCrimesPerMonth(_sdf: PySparkDataFrame) -> pd.DataFrame:
