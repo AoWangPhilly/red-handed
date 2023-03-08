@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+data/NYPD_Complaint_Data_Historic.csv
+iframe_figures/
