@@ -1,5 +1,11 @@
 import streamlit as st
 
+st.set_page_config(
+    page_title="NYC Crime Analysis",
+    page_icon=":city_sunset:",
+)
+
+
 with st.container() as intro:
     st.title("Red-Handed :oncoming_police_car: :cop:")
     st.write("By: Ao Wang")
