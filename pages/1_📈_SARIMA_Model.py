@@ -159,20 +159,27 @@ fig = plot_seasonal_decompose(multiplicative_decomposition, dates=crimesPerMonth
 model_fit = createSARIMAModel(crimesPerMonth["count"])
 
 
+st.title("NYC Crime Predictor Model")
+
 initialPredictionsPage, SARIMAModelPage, diagnosticsPage = st.tabs(
     ["Initial Predictions", "SARIMA Model", "Diagnostics"]
 )
 
-
 with initialPredictionsPage:
-    st.title("NYC Crime Predictor Model")
     st.plotly_chart(
         fig,
         use_container_width=True,
     )
 
 with SARIMAModelPage:
-    st.plotly_chart(createPredictedPlot(model=model_fit), use_container_width=True)
+    year = st.selectbox(
+        "How far to predict: ",
+        range(1, 11),
+    )
+    months = year * 12
+    st.plotly_chart(
+        createPredictedPlot(model=model_fit, months=months), use_container_width=True
+    )
 
 with diagnosticsPage:
     diagonosticFigure = model_fit.plot_diagnostics(figsize=(15, 12))
