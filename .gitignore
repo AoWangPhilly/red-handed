@@ -131,3 +131,4 @@ dmypy.json
 data/NYPD_Complaint_Data_Historic.csv
 iframe_figures/
 .idea/*
+.vscode/*
