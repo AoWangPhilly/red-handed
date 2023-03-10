@@ -58,24 +58,31 @@ correlationsPerCrime = getCorrelationPerCrimes(
     weatherDF=df, _crimeDF=outsideCrimes, typesOfCrimes=typesOfCrimes
 )
 
-gb = GridOptionsBuilder.from_dataframe(correlationsPerCrime)
-gb.configure_pagination(
-    paginationAutoPageSize=True, paginationPageSize=5
-)  # Add pagination
-gb.configure_side_bar()  # Add a sidebar
-gb.configure_selection()
-gridOptions = gb.build()
 
-data_grid, graph = st.columns(2)
+def draw_aggrid_df(df) -> AgGrid:
+    gb = GridOptionsBuilder.from_dataframe(df)
+
+    gb.configure_pagination(paginationAutoPageSize=True)
+    gb.configure_grid_options(domLayout="normal")
+    gb.configure_selection()
+    gridOptions = gb.build()
+
+    grid_response = AgGrid(
+        df,
+        gridOptions=gridOptions,
+        height=300,
+        width="100%",
+        data_return_mode="AS_INPUT",
+        fit_columns_on_grid_load=True,
+        update_mode="MODEL_CHANGED",
+    )
+
+    return grid_response
+
 
 with st.container():
-    grid_response = AgGrid(
-        correlationsPerCrime,
-        gridOptions=gridOptions,
-        data_return_mode="AS_INPUT",
-        update_mode="MODEL_CHANGED",
-        fit_columns_on_grid_load=True,
-    )
+    grid_response = draw_aggrid_df(correlationsPerCrime)
+    print(grid_response)
     if selectRows := grid_response["selected_rows"]:
         crime = selectRows[0]["Crime"]
     else:
