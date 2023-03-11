@@ -1,4 +1,4 @@
-from statsmodels.tsa.seasonal import DecomposeResult, seasonal_decompose
+from statsmodels.tsa.seasonal import DecomposeResult
 import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -7,6 +7,7 @@ import streamlit as st
 import numpy as np
 import pmdarima as pm
 import plotly.express as px
+
 from src.crime import getSpecificCrimes
 
 
@@ -15,6 +16,16 @@ def plot_seasonal_decompose(
     dates: pd.Series = None,
     title: str = "Seasonal Decomposition",
 ):
+    """Plot the seasonal decomposition of a time series
+
+    Args:
+        result (DecomposeResult): The result of the seasonal decomposition
+        dates (pd.Series, optional): The x-axis values. Defaults to None.
+        title (str, optional): The title for the plot. Defaults to "Seasonal Decomposition".
+
+    Returns:
+        plotly.graph_objects.Figure: The plotly figure
+    """
     x_values = dates if dates is not None else np.arange(len(result.observed))
     return (
         make_subplots(
@@ -45,6 +56,7 @@ def plot_seasonal_decompose(
         .update_layout(
             title=f"<b>{title}</b>",
             showlegend=False,
+            height=800,
         )
     )
 
@@ -61,6 +73,11 @@ def createSARIMAModel(data: pd.DataFrame) -> SARIMAX:
         d=1,
         error_action="ignore",
     )
+    """Create a SARIMA model
+
+    Returns:
+        SARIMAX: The SARIMA model
+    """
     parameters = model.get_params()
 
     model_fit = SARIMAX(
@@ -72,6 +89,16 @@ def createSARIMAModel(data: pd.DataFrame) -> SARIMAX:
 
 
 def createPredictedPlot(model, crimesPerMonth: pd.DataFrame, months: int = 12 * 4):
+    """Create a plot of the predicted values
+
+    Args:
+        model (SARIMAX): The SARIMA model
+        crimesPerMonth (pd.DataFrame): The crime data
+        months (int, optional): The number of months to predict. Defaults to 12*4, 4 years.
+
+    Returns:
+        plotly.graph_objects.Figure: The plotly figure
+    """
     yPred = model.forecast(months)
     fig = go.Figure()
 
@@ -102,6 +129,16 @@ def createPredictedPlot(model, crimesPerMonth: pd.DataFrame, months: int = 12 * 
 
 
 def plotCrimesVsTemp(crime: str, weatherDF: pd.DataFrame, outsideCrimes: pd.DataFrame):
+    """Plot the crimes vs. temperature
+
+    Args:
+        crime (str): The crime to plot
+        weatherDF (pd.DataFrame): The weather data
+        outsideCrimes (pd.DataFrame): The crime data
+
+    Returns:
+        plotly.graph_objects.Figure: The plotly figure
+    """
     crimeDF = getSpecificCrimes(_sdf=outsideCrimes, crime=crime)
 
     fig = px.scatter(
