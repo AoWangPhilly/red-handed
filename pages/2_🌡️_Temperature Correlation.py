@@ -1,11 +1,13 @@
 from os.path import join
 from pyspark.sql.functions import col, year, month
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
+from st_aggrid import GridOptionsBuilder, AgGrid
+import streamlit as st
+
 from src.plot import plotCrimesVsTemp
 from src.weather import read_weather_data
 from src.util import initializeSpark
-from src.crime import getCrimesPerMonth, getCorrelationPerCrimes
-import streamlit as st
+from src.crime import getCrimesPerMonth
+from src.model import getCorrelationPerCrimes
 
 spark, _ = initializeSpark()
 processedSDF = spark.read.load(
@@ -74,7 +76,7 @@ def draw_aggrid_df(df) -> AgGrid:
         width="100%",
         data_return_mode="AS_INPUT",
         fit_columns_on_grid_load=True,
-        update_mode="MODEL_CHANGED",
+        update_mode="SELECTION_CHANGED",
     )
 
     return grid_response
@@ -82,10 +84,11 @@ def draw_aggrid_df(df) -> AgGrid:
 
 with st.container():
     grid_response = draw_aggrid_df(correlationsPerCrime)
-    print(grid_response)
     if selectRows := grid_response["selected_rows"]:
         crime = selectRows[0]["Crime"]
     else:
         crime = "ASSAULT & RELATED OFFENSES"
 
-    st.plotly_chart(plotCrimesVsTemp(crime, df, outsideCrimesDF))
+    st.plotly_chart(
+        plotCrimesVsTemp(crime, df, outsideCrimesDF), use_container_width=True
+    )

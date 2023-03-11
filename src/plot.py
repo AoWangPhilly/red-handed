@@ -99,7 +99,7 @@ def createPredictedPlot(model, crimesPerMonth: pd.DataFrame, months: int = 12 * 
     Returns:
         plotly.graph_objects.Figure: The plotly figure
     """
-    yPred = model.forecast(months)
+    yPred = model.predict(start=len(crimesPerMonth), end=len(crimesPerMonth) + months)
     fig = go.Figure()
 
     fig.add_traces(

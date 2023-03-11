@@ -9,12 +9,13 @@ import plotly.express as px
 import numpy as np
 from statsmodels.tsa.stattools import adfuller
 
-from src.crime import (
-    createLinearRegressionModel,
-    getCrimesPerMonth,
-    getLinearRegressionMetrics,
-)
+from src.crime import getCrimesPerMonth
 
+from src.model import (
+    createLinearRegressionModel,
+    getLinearRegressionMetrics,
+    calculateError,
+)
 from src.util import initializeSpark
 from src.plot import (
     plot_seasonal_decompose,
@@ -40,8 +41,13 @@ multiplicative_decomposition = seasonal_decompose(
     crimesPerMonth["count"], model="multiplicative", extrapolate_trend="freq"
 )
 
+# Use 80% of the data for training
+train_size = int(len(crimesPerMonth) * 0.8)
+train = crimesPerMonth.iloc[:train_size]
+test = crimesPerMonth.iloc[train_size:]
+
 # Create the SARIMA model
-model_fit = createSARIMAModel(crimesPerMonth["count"])
+model_fit = createSARIMAModel(train)
 # --------------------- Setup --------------------- #
 
 
@@ -208,6 +214,29 @@ with SARIMAModelPage:
         use_container_width=True,
     )
 
+    st.write("### Error")
+    st.write(
+        "MAPE measures the average absolute percentage difference between the predicted "
+        "values and the actual values. It shows the average percentage difference between "
+        "the predicted and actual values. In our case 6.3%, which is relatively low, meaning "
+        "our model is accurate. At least much more accurate than the linear regression."
+    )
+
+    st.write(
+        "RMSE measures the square root of the average of the squared differences between the "
+        "predicted values and the actual values. It shows the magnitude of the errors in your "
+        "predictions, and it gives more weight to large errors compared to smaller errors."
+    )
+    col1, col2 = st.columns(2)
+
+    mape, rsme = calculateError(model=model_fit, test=test)
+
+    with col1:
+        st.metric(label="MAPE", value=f"{mape:.2f}%")
+
+    with col2:
+        st.metric(label="RMSE", value=f"{rsme:.2f}")
+
 with diagnosticsPage:
     st.write("### Diagnostics")
     st.write(
@@ -221,5 +250,6 @@ with diagnosticsPage:
     )
     diagonosticFigure = model_fit.plot_diagnostics(figsize=(15, 12))
     st.pyplot(diagonosticFigure, bbox_inches="tight")
+
 
 # --------------------- Create the UI --------------------- #
