@@ -12,3 +12,14 @@ def initializeSpark() -> Tuple[SparkSession, SparkContext]:
     conf = SparkConf().setAppName("crime-processor").setMaster("local")
     spark = SparkSession.builder.config(conf=conf).getOrCreate()
     return spark, spark.sparkContext
+
+
+def convert_to_am_pm(hour: int) -> str:
+    if hour == 0:
+        return "12 AM"
+    elif 1 <= hour <= 11:
+        return f"{hour} AM"
+    elif hour == 12:
+        return "12 PM"
+    else:
+        return f"{hour - 12} PM"

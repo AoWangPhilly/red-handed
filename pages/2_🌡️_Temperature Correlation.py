@@ -2,12 +2,38 @@ from os.path import join
 from pyspark.sql.functions import col, year, month
 from st_aggrid import GridOptionsBuilder, AgGrid
 import streamlit as st
+import plotly.express as px
 
-from src.plot import plotCrimesVsTemp
+from src.plot import compareCrimeRateAndTemperature, plotCrimesVsTemp
 from src.weather import read_weather_data
 from src.util import initializeSpark
 from src.crime import getCrimesPerMonth
 from src.model import getCorrelationPerCrimes
+
+st.set_page_config(layout="wide")
+
+
+# ---------------- Setup ----------------
+def draw_aggrid_df(df) -> AgGrid:
+    gb = GridOptionsBuilder.from_dataframe(df)
+
+    gb.configure_pagination(paginationAutoPageSize=True)
+    gb.configure_grid_options(domLayout="normal")
+    gb.configure_selection()
+    gridOptions = gb.build()
+
+    grid_response = AgGrid(
+        df,
+        gridOptions=gridOptions,
+        height=300,
+        width="100%",
+        data_return_mode="AS_INPUT",
+        fit_columns_on_grid_load=True,
+        update_mode="SELECTION_CHANGED",
+    )
+
+    return grid_response
+
 
 spark, _ = initializeSpark()
 processedSDF = spark.read.load(
@@ -54,35 +80,55 @@ typesOfCrimes = (
 
 df = read_weather_data()
 
-st.title("Temperature Correlation with Crime")
-
 correlationsPerCrime = getCorrelationPerCrimes(
     weatherDF=df, _crimeDF=outsideCrimes, typesOfCrimes=typesOfCrimes
 )
+# ---------------- Setup ----------------
 
 
-def draw_aggrid_df(df) -> AgGrid:
-    gb = GridOptionsBuilder.from_dataframe(df)
+# ---------------- Design UI ----------------
+st.title("Temperature Correlation with Crime")
 
-    gb.configure_pagination(paginationAutoPageSize=True)
-    gb.configure_grid_options(domLayout="normal")
-    gb.configure_selection()
-    gridOptions = gb.build()
+(discoveryPage, outsideVsInsidePage, temperatureAndCrimePage) = st.tabs(
+    ["Discovery", "Outside vs. Inside", "Temperature and Crime"]
+)
 
-    grid_response = AgGrid(
-        df,
-        gridOptions=gridOptions,
-        height=300,
-        width="100%",
-        data_return_mode="AS_INPUT",
-        fit_columns_on_grid_load=True,
-        update_mode="SELECTION_CHANGED",
+with discoveryPage:
+    crimeRateAndTemperatureFig = compareCrimeRateAndTemperature(
+        weatherData=df, crimeData=crimesPerMonth
+    )
+    st.plotly_chart(crimeRateAndTemperatureFig, use_container_width=True)
+
+with outsideVsInsidePage:
+    insideFig = px.scatter(
+        x=df.TAVG,
+        y=insideCrimesDF["count"],
+        trendline="ols",
+        title="Indoor Crimes per Month vs. Temperature",
     )
 
-    return grid_response
+    insideFig.update_layout(
+        xaxis_title="Temperature (°C)",
+        yaxis_title="Crime Rate",
+    )
+
+    outsideFig = px.scatter(
+        x=df.TAVG,
+        y=outsideCrimesDF["count"],
+        trendline="ols",
+        title="Outdoor Crimes per Month vs. Temperature",
+    )
+
+    outsideFig.update_layout(
+        xaxis_title="Temperature (°C)",
+        yaxis_title="Crime Rate",
+    )
+
+    st.plotly_chart(insideFig, use_container_width=True)
+    st.plotly_chart(outsideFig, use_container_width=True)
 
 
-with st.container():
+with temperatureAndCrimePage:
     grid_response = draw_aggrid_df(correlationsPerCrime)
     if selectRows := grid_response["selected_rows"]:
         crime = selectRows[0]["Crime"]
@@ -92,3 +138,5 @@ with st.container():
     st.plotly_chart(
         plotCrimesVsTemp(crime, df, outsideCrimesDF), use_container_width=True
     )
+
+# ---------------- Design UI ----------------
