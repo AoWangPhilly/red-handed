@@ -24,7 +24,10 @@ from src.plot import (
     createPredictedPlot,
 )
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_icon=":city_sunset:",
+)
 
 
 def main():

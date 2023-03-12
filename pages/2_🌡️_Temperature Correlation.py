@@ -9,7 +9,10 @@ from src.util import initializeSpark
 from src.crime import getCrimesPerMonth, splitCrimeToInsideOutside, getTypesOfCrimes
 from src.model import getCorrelationPerCrimes
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_icon=":city_sunset:",
+)
 
 
 # ---------------- Setup ----------------

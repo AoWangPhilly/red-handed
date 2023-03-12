@@ -17,7 +17,10 @@ from src.plot import (
 )
 from src.map import createBoroughMap, createPrecinctMap
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_icon=":city_sunset:",
+)
 
 
 # ---------------- Setup ----------------

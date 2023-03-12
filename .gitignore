@@ -132,3 +132,5 @@ data/NYPD_Complaint_Data_Historic.csv
 iframe_figures/
 .idea/*
 .vscode/*
+.DS_Store
+data/.DS_Store
