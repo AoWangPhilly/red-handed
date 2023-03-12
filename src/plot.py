@@ -8,7 +8,8 @@ import numpy as np
 import pmdarima as pm
 import plotly.express as px
 
-from src.crime import getSpecificCrimes
+from .crime import getSpecificCrimes
+from .util import convert_to_am_pm
 
 
 def plot_seasonal_decompose(
@@ -157,7 +158,10 @@ def plotCrimesVsTemp(crime: str, weatherDF: pd.DataFrame, outsideCrimes: pd.Data
 
 def compareCrimeRateAndTemperature(weatherData: pd.DataFrame, crimeData: pd.DataFrame):
     fig = make_subplots(
-        rows=2, cols=1, subplot_titles=("Temperature", "Crime Rate"), shared_xaxes=True
+        rows=2,
+        cols=1,
+        subplot_titles=("Temperature", "Crime Rate"),
+        shared_xaxes=True,
     )
 
     average_temperature = go.Scatter(
@@ -192,6 +196,7 @@ def compareCrimeRateAndTemperature(weatherData: pd.DataFrame, crimeData: pd.Data
 
     fig.update_layout(
         title="Temperature and Crime Rates from 2006-2021",
+        height=600,
     )
     return fig
 

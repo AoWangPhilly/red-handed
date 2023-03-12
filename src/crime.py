@@ -1,5 +1,9 @@
+from typing import Tuple
+import datetime as dt
+
 import streamlit as st
 import pandas as pd
+
 from pyspark.sql.functions import col, year, month, dayofmonth, hour
 from pyspark.sql.dataframe import DataFrame as PySparkDataFrame
 
@@ -136,3 +140,50 @@ def getPrecinctData(
     )
     precinctCrimes["REPORT_LATENCY"] = precinctCrimes.RPT_DT - precinctCrimes.CMPLNT_FR
     return precinctCrimes
+
+
+@st.cache_resource
+def splitCrimeToInsideOutside(
+    _sdf: PySparkDataFrame,
+) -> Tuple[PySparkDataFrame, PySparkDataFrame, pd.DataFrame, pd.DataFrame]:
+    outsideCrimes = (
+        _sdf.select(
+            "LOC_OF_OCCUR_DESC",
+            year("CMPLNT_FR").alias("CMPLNT_FR_YEAR"),
+            month("CMPLNT_FR").alias("CMPLNT_FR_MONTH"),
+        )
+        .filter((col("LOC_OF_OCCUR_DESC") != "INSIDE"))
+        .cache()
+    )
+
+    insideCrimes = _sdf.select(
+        "LOC_OF_OCCUR_DESC",
+        year("CMPLNT_FR").alias("CMPLNT_FR_YEAR"),
+        month("CMPLNT_FR").alias("CMPLNT_FR_MONTH"),
+    ).filter((col("LOC_OF_OCCUR_DESC") == "INSIDE"))
+
+    outsideCrimesDF = (
+        outsideCrimes.groupBy(["CMPLNT_FR_YEAR", "CMPLNT_FR_MONTH"])
+        .count()
+        .sort([col("CMPLNT_FR_YEAR"), col("CMPLNT_FR_MONTH")])
+        .toPandas()
+    )
+
+    insideCrimesDF = (
+        insideCrimes.groupBy(["CMPLNT_FR_YEAR", "CMPLNT_FR_MONTH"])
+        .count()
+        .sort([col("CMPLNT_FR_YEAR"), col("CMPLNT_FR_MONTH")])
+        .toPandas()
+    )
+    return outsideCrimes, insideCrimes, outsideCrimesDF, insideCrimesDF
+
+
+@st.cache_data
+def getTypesOfCrimes(_sdf: PySparkDataFrame) -> pd.DataFrame:
+    typesOfCrimes = (
+        _sdf.filter((col("LOC_OF_OCCUR_DESC") != "INSIDE"))
+        .select("OFNS_DESC")
+        .distinct()
+        .toPandas()
+    )
+    return typesOfCrimes

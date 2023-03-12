@@ -1,9 +1,6 @@
 from os.path import join
-from typing import List
 from typing import Tuple
 
-import folium
-import geopandas as gpd
 import pandas as pd
 import streamlit as st
 from pyspark import SparkConf, SparkContext
@@ -12,19 +9,24 @@ from pyspark.sql.dataframe import DataFrame as PySparkDataFrame
 from pyspark.sql.functions import col, year, month, dayofmonth, hour
 from streamlit_folium import st_folium
 
+from src.crime import getBoroughData, getPrecinctData
+from src.plot import (
+    crimeDurationAndReportLatency,
+    crimeFrequencySubplot,
+    getTopNCrimePlot,
+)
+from src.map import createBoroughMap, createPrecinctMap
 
+st.set_page_config(layout="wide")
+
+
+# ---------------- Setup ----------------
 @st.cache_resource
 def initializeSpark() -> Tuple[SparkSession, SparkContext]:
     """Create a Spark Session for Streamlit app"""
     conf = SparkConf().setAppName("crime-processor").setMaster("local")
     spark = SparkSession.builder.config(conf=conf).getOrCreate()
     return spark, spark.sparkContext
-
-
-spark, _ = initializeSpark()
-processedSDF = spark.read.load(
-    path=join("data", "NYPD_Complaint_Data_Historic.parquet"), format="parquet"
-)
 
 
 @st.cache_data
@@ -54,135 +56,99 @@ def getCrimesPerMonth(_sdf: PySparkDataFrame) -> pd.DataFrame:
     return crimesPerMonth
 
 
-def createNYCMap() -> folium.folium.Map:
-    # Central lat/long values of NYC
-    nycCoordinates = [40.72, -73.9999]
-    zoom = 10
+def getBoroughFromMap(st_data) -> str:
+    """Returns the borough from the map
+    Args:
+        st_data (dict): The data from the map
+    Returns:
+        str: The borough
+    """
+    if st_data.get("last_active_drawing") is None:
+        return ""
 
-    # instatiate a folium map object with the above coordinate at center
-    nycCrimeMap = folium.Map(location=nycCoordinates, zoom_start=zoom)
-    return nycCrimeMap
-
-
-def createChloropleth(
-    map_: folium.folium.Map,
-    geoData: gpd.geodataframe.GeoDataFrame,
-    columns: List[str],
-    keyOn: str,
-) -> folium.folium.Map:
-    style_function = lambda x: {
-        "fillColor": "#ffffff",
-        "color": "#000000",
-        "fillOpacity": 0.1,
-        "weight": 0.1,
-    }
-
-    highlight_function = lambda x: {
-        "fillColor": "#000000",
-        "color": "#000000",
-        "fillOpacity": 0.50,
-        "weight": 0.1,
-    }
-    folium.Choropleth(
-        geo_data=geoData,
-        data=geoData,
-        columns=columns,
-        key_on=keyOn,
-        fill_color="YlOrRd",
-        fill_opacity=0.7,
-        line_opacity=0.1,
-    ).add_to(map_)
-
-    folium.features.GeoJson(
-        geoData,
-        style_function=style_function,
-        control=False,
-        highlight_function=highlight_function,
-        tooltip=folium.features.GeoJsonTooltip(
-            fields=columns,
-            style=(
-                "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;"
-            ),
-        ),
-    ).add_to(map_)
-
-    return map_
+    return st_data["last_active_drawing"]["properties"]["BORO_NM"]
 
 
-def createBoroughMap(_sdf: PySparkDataFrame, choosenYear: int) -> folium.folium.Map:
-    map_ = createNYCMap()
+def getPrecinctFromMap(st_data) -> str:
+    """Returns the precinct from the map
+    Args:
+        st_data (dict): The data from the map
+    Returns:
+        str: The precinct
+    """
+    if st_data.get("last_active_drawing") is None:
+        return ""
 
-    boroughCrimeCountPerYear = (
-        _sdf.select("BORO_NM", year("CMPLNT_FR").alias("year"))
-        .groupby(["BORO_NM", "year"])
-        .count()
-        .cache()
-        .toPandas()
+    return st_data["last_active_drawing"]["properties"]["precinct"]
+
+
+# ---------------- Setup ----------------
+
+
+# ---------------- Design UI ----------------
+def main():
+    spark, _ = initializeSpark()
+    processedSDF = spark.read.load(
+        path=join("data", "NYPD_Complaint_Data_Historic.parquet"), format="parquet"
     )
 
-    yearCrimeCount = boroughCrimeCountPerYear[
-        boroughCrimeCountPerYear.year == choosenYear
-    ].drop(columns=["year"])
-    yearCrimeCount.BORO_NM = yearCrimeCount.BORO_NM.str.title()
+    st.title("Crime in Boroughs and Precincts")
 
-    boroughGeoJson = gpd.read_file(join("geojson", "Borough Boundaries.geojson"))
-    boroughDF = boroughGeoJson.merge(
-        yearCrimeCount, left_on="boro_name", right_on="BORO_NM", how="left"
-    )
-    return createChloropleth(
-        map_=map_,
-        geoData=boroughDF,
-        columns=["boro_name", "count"],
-        keyOn="feature.properties.boro_name",
-    )
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("### Tutorial")
+        st.write(
+            "Select a borough or precinct to view the crime map then select a year to view the crime map for that year."
+            "Once the map loads, the areas highlighted in red are the areas with the highest crime rate."
+            "The areas highlighted in yellow are the areas with the lowest crime rate. Additionally, "
+            "the areas are clickable and the charts will react on which area you click on."
+        )
+        with st.form("map-form"):
+            boroughOrPrecinct = st.selectbox("Select Type:", ("Borough", "Precinct"))
+            chooseYear = st.selectbox("Select Year:", range(2006, 2022))
+            submit = st.form_submit_button("Submit")
+    with col2:
+        if submit:
+            NYCMap = (
+                createBoroughMap(processedSDF, choosenYear=chooseYear)
+                if boroughOrPrecinct == "Borough"
+                else createPrecinctMap(processedSDF, choosenYear=chooseYear)
+            )
+            st_data = st_folium(NYCMap, width="100%", height="440")
+            st.session_state.map = NYCMap
+        else:
+            if map_ := st.session_state.get("map"):
+                st_data = st_folium(map_, width="100%", height="440")
+
+                placeName = (
+                    getBoroughFromMap(st_data)
+                    if boroughOrPrecinct == "Borough"
+                    else getPrecinctFromMap(st_data)
+                )
+                st.session_state.area = placeName
+
+    if placeName := st.session_state.get("area"):
+        if boroughOrPrecinct == "Borough":
+            st.write(f"### {placeName} - {chooseYear}")
+            data = getBoroughData(
+                sdf=processedSDF, borough=placeName.upper(), choosenYear=chooseYear
+            )
+        else:
+            st.write(f"### Precinct {placeName} - {chooseYear}")
+            data = getPrecinctData(
+                sdf=processedSDF, precinct=int(placeName), choosenYear=chooseYear
+            )
+
+        topNCrimeFig = getTopNCrimePlot(data)
+        frequencyFig = crimeFrequencySubplot(data)
+        durationAndLatency = crimeDurationAndReportLatency(data)
+        st.plotly_chart(topNCrimeFig, use_container_width=True)
+        st.plotly_chart(frequencyFig, use_container_width=True)
+        st.plotly_chart(durationAndLatency, use_container_width=True)
 
 
-def createPrecinctMap(sdf: PySparkDataFrame, choosenYear: int) -> folium.folium.Map:
-    map_ = createNYCMap()
+# ---------------- Design UI ----------------
 
-    precinctCrimeCountPerYear = (
-        sdf.select("ADDR_PCT_CD", year("CMPLNT_FR").alias("year"))
-        .groupby(["ADDR_PCT_CD", "year"])
-        .count()
-        .cache()
-        .toPandas()
-    )
-
-    yearCrimeCount = (
-        precinctCrimeCountPerYear[precinctCrimeCountPerYear.year == choosenYear]
-        .rename(columns={"ADDR_PCT_CD": "precinct"})
-        .drop(columns=["year"])
-    )
-
-    precinctGeoJson = gpd.read_file(join("geojson", "Police Precincts.geojson"))
-    precinctGeoJson.precinct = precinctGeoJson.precinct.astype("Int32")
-    precinctDF = precinctGeoJson.merge(yearCrimeCount, on="precinct", how="left")
-
-    return createChloropleth(
-        map_=map_,
-        geoData=precinctDF,
-        columns=["precinct", "count"],
-        keyOn="feature.properties.precinct",
-    )
-
-
-st.title("Crime in Boroughs and Precincts")
-
-col1, col2 = st.columns(2)
-
-with st.form("map-form"):
-    boroughOrPrecinct = st.selectbox("Select Type:", ("Borough", "Precinct"))
-    chooseYear = st.selectbox("Select Year:", range(2006, 2022))
-    submit = st.form_submit_button("Submit")
-
-if submit:
-    NYCMap = (
-        createBoroughMap(processedSDF, choosenYear=chooseYear)
-        if boroughOrPrecinct == "Borough"
-        else createPrecinctMap(processedSDF, choosenYear=chooseYear)
-    )
-    st_data = st_folium(NYCMap)
-    st.session_state.map = NYCMap
-else:
-    if map_ := st.session_state.get("map"):
-        st_folium(map_, width="100%")
+if __name__ == "__main__":
+    main()
