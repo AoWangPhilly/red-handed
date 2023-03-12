@@ -112,7 +112,7 @@ def main():
             crime = selectRows[0]["Crime"]
         else:
             crime = "ASSAULT & RELATED OFFENSES"
-
+        print(crime)
         st.plotly_chart(
             plotCrimesVsTemp(crime, df, outsideCrimesDF), use_container_width=True
         )

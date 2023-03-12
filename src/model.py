@@ -1,4 +1,5 @@
 from typing import List, Tuple
+from concurrent import futures
 
 import streamlit as st
 import pandas as pd
@@ -6,8 +7,29 @@ import statsmodels.formula.api as smf
 from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
+from pyspark.sql.dataframe import DataFrame as PySparkDataFrame
 
 from .crime import getSpecificCrimes
+
+
+@st.cache_data
+def getCorrelation(
+    _sdf: PySparkDataFrame, weatherData: pd.DataFrame, crime: str
+) -> Tuple[str, float]:
+    crimeSpecificDF = getSpecificCrimes(_sdf=_sdf, crime=crime)
+
+    # check if the length of the crimeSpecificDF and weatherData are the same,
+    # will need this for the merge
+    if len(crimeSpecificDF) == len(weatherData):
+        merged = crimeSpecificDF.merge(weatherData, left_index=True, right_index=True)
+
+        # create the model and fit it
+        ols = smf.ols(formula="TAVG ~ count", data=merged)
+        model = ols.fit()
+
+        # append the crime and the correlation to the output list
+        return crime, model.rsquared
+    return crime, -1
 
 
 @st.cache_data
@@ -24,35 +46,21 @@ def getCorrelationPerCrimes(
     Returns:
         pd.DataFrame: A DataFrame with the correlation between the number of crimes and the temperature
     """
-    output = []
-
     # rename the date column and set it as the index
     weatherData = weatherDF.rename(columns={"DATE": "Date"}).set_index("Date")
 
-    # loop through the crimes and get the correlation
-    for crime in typesOfCrimes["OFNS_DESC"]:
-        print(crime)
-        crimeSpecificDF = getSpecificCrimes(_sdf=_crimeDF, crime=crime)
-
-        # check if the length of the crimeSpecificDF and weatherData are the same,
-        # will need this for the merge
-        if len(crimeSpecificDF) == len(weatherData):
-            merged = crimeSpecificDF.merge(
-                weatherData, left_index=True, right_index=True
-            )
-
-            # create the model and fit it
-            ols = smf.ols(formula="TAVG ~ count", data=merged)
-            model = ols.fit()
-
-            # append the crime and the correlation to the output list
-            output.append((crime, model.rsquared))
-
+    output = map(
+        lambda x: getCorrelation(_sdf=_crimeDF, weatherData=weatherData, crime=x),
+        typesOfCrimes["OFNS_DESC"],
+    )
+    output = list(filter(lambda x: x[1] != -1, output))
     # create a DataFrame from the output list and sort it by the correlation (descending)
-    return pd.DataFrame(
+
+    df = pd.DataFrame(
         sorted(output, key=lambda x: x[1], reverse=True),
         columns=["Crime", "Correlation"],
     )
+    return df
 
 
 def getLinearRegressionMetrics(regr, crimeData):
