@@ -24,7 +24,7 @@ def draw_aggrid_df(df) -> AgGrid:
     grid_response = AgGrid(
         df,
         gridOptions=gridOptions,
-        height=300,
+        height=500,
         width="100%",
         data_return_mode="AS_INPUT",
         fit_columns_on_grid_load=True,
@@ -170,15 +170,20 @@ def main():
             "You can select a crime from the table below to see the correlation between "
             "temperature and that crime with a scatter plot and the linear regression line"
         )
-        grid_response = draw_aggrid_df(correlationsPerCrime)
+        col1, col2 = st.columns(2)
+
+        with col1:
+            grid_response = draw_aggrid_df(correlationsPerCrime)
+
         if selectRows := grid_response["selected_rows"]:
             crime = selectRows[0]["Crime"]
         else:
             crime = "ASSAULT & RELATED OFFENSES"
-        print(crime)
-        st.plotly_chart(
-            plotCrimesVsTemp(crime, df, outsideCrimesDF), use_container_width=True
-        )
+
+        with col2:
+            st.plotly_chart(
+                plotCrimesVsTemp(crime, df, outsideCrimesDF), use_container_width=True
+            )
 
 
 # ---------------- Design UI ----------------
