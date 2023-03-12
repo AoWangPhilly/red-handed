@@ -8,6 +8,11 @@ from pyspark.sql.functions import year
 
 
 def createNYCMap() -> folium.folium.Map:
+    """Creates a map of NYC
+
+    Returns:
+        folium.folium.Map: A map of NYC
+    """
     # Central lat/long values of NYC
     nycCoordinates = [40.72, -73.9999]
     zoom = 10
@@ -23,6 +28,17 @@ def createChloropleth(
     columns: List[str],
     keyOn: str,
 ) -> folium.folium.Map:
+    """Creates a chloropleth map
+
+    Args:
+        map_ (folium.folium.Map): the map to add the chloropleth to
+        geoData (gpd.geodataframe.GeoDataFrame): the GeoDataFrame to use
+        columns (List[str]): the columns to use
+        keyOn (str): the key to use
+
+    Returns:
+        folium.folium.Map: the map with the chloropleth added
+    """
     style_function = lambda x: {
         "fillColor": "#ffffff",
         "color": "#000000",
@@ -36,6 +52,8 @@ def createChloropleth(
         "fillOpacity": 0.50,
         "weight": 0.1,
     }
+
+    # add a choropleth layer to the map
     folium.Choropleth(
         geo_data=geoData,
         data=geoData,
@@ -46,6 +64,7 @@ def createChloropleth(
         line_opacity=0.1,
     ).add_to(map_)
 
+    # add a GeoJson layer to the map
     folium.features.GeoJson(
         geoData,
         style_function=style_function,
@@ -64,6 +83,15 @@ def createChloropleth(
 
 @st.cache_resource
 def createBoroughMap(_sdf: PySparkDataFrame, choosenYear: int) -> folium.folium.Map:
+    """Creates a map of NYC with the boroughs colored by the number of crimes in a given year
+
+    Args:
+        _sdf (PySparkDataFrame): the Spark DataFrame to use
+        choosenYear (int): the year to use
+
+    Returns:
+        folium.folium.Map: the map with the boroughs colored by the number of crimes in a given year
+    """
     map_ = createNYCMap()
 
     boroughCrimeCountPerYear = (
@@ -93,6 +121,15 @@ def createBoroughMap(_sdf: PySparkDataFrame, choosenYear: int) -> folium.folium.
 
 @st.cache_resource
 def createPrecinctMap(_sdf: PySparkDataFrame, choosenYear: int) -> folium.folium.Map:
+    """Creates a map of NYC with the precincts colored by the number of crimes in a given year
+
+    Args:
+        _sdf (PySparkDataFrame): the Spark DataFrame to use
+        choosenYear (int): the year to use
+
+    Returns:
+        folium.folium.Map: the map with the precincts colored by the number of crimes in a given year
+    """
     map_ = createNYCMap()
 
     precinctCrimeCountPerYear = (

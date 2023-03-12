@@ -55,6 +55,7 @@ def main():
     # --------------------- Create the UI --------------------- #
     st.title("NYC Crime Predictor Model")
 
+    # Create the tabs
     (
         initialPredictionsPage,
         seasonalDecompositionPage,
@@ -66,6 +67,7 @@ def main():
 
     with initialPredictionsPage:
         st.write("## Initial Predictions")
+
         regr = createLinearRegressionModel(crimeData=crimesPerMonth)
         predicted = regr.predict(
             crimesPerMonth.index.values.reshape(-1, 1).astype("float64")

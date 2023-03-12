@@ -129,23 +129,24 @@ def main():
                 st.session_state.area = placeName
 
     if placeName := st.session_state.get("area"):
-        if boroughOrPrecinct == "Borough":
-            st.write(f"### {placeName} - {chooseYear}")
-            data = getBoroughData(
-                sdf=processedSDF, borough=placeName.upper(), choosenYear=chooseYear
-            )
-        else:
-            st.write(f"### Precinct {placeName} - {chooseYear}")
-            data = getPrecinctData(
-                sdf=processedSDF, precinct=int(placeName), choosenYear=chooseYear
-            )
+        try:
+            if boroughOrPrecinct == "Borough":
+                data = getBoroughData(
+                    sdf=processedSDF, borough=placeName.upper(), choosenYear=chooseYear
+                )
+            elif boroughOrPrecinct == "Precinct":
+                data = getPrecinctData(
+                    sdf=processedSDF, precinct=int(placeName), choosenYear=chooseYear
+                )
 
-        topNCrimeFig = getTopNCrimePlot(data)
-        frequencyFig = crimeFrequencySubplot(data)
-        durationAndLatency = crimeDurationAndReportLatency(data)
-        st.plotly_chart(topNCrimeFig, use_container_width=True)
-        st.plotly_chart(frequencyFig, use_container_width=True)
-        st.plotly_chart(durationAndLatency, use_container_width=True)
+            topNCrimeFig = getTopNCrimePlot(data)
+            frequencyFig = crimeFrequencySubplot(data)
+            durationAndLatency = crimeDurationAndReportLatency(data)
+            st.plotly_chart(topNCrimeFig, use_container_width=True)
+            st.plotly_chart(frequencyFig, use_container_width=True)
+            st.plotly_chart(durationAndLatency, use_container_width=True)
+        except Exception as e:
+            pass
 
 
 # ---------------- Design UI ----------------

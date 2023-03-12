@@ -85,6 +85,16 @@ def getSpecificCrimes(_sdf: PySparkDataFrame, crime: str) -> pd.DataFrame:
 def getBoroughData(
     sdf: PySparkDataFrame, borough: str = "BROOKLYN", choosenYear: int = 2021
 ) -> pd.DataFrame:
+    """Returns a DataFrame with the crimes for a specific borough
+
+    Args:
+        sdf (PySparkDataFrame): The Spark DataFrame to use
+        borough (str, optional): The borough. Defaults to "BROOKLYN".
+        choosenYear (int, optional): The year. Defaults to 2021.
+
+    Returns:
+        pd.DataFrame: A DataFrame with the crimes for a specific borough
+    """
     boroughColumns = [
         "BORO_NM",
         "CMPLNT_FR",
@@ -94,6 +104,7 @@ def getBoroughData(
         "PD_DESC",
         "LAW_CAT_CD",
     ]
+    # get the crimes for the specific borough
     boroughCrimes = (
         sdf.select(boroughColumns)
         .filter((year("CMPLNT_FR") == choosenYear) & (col("BORO_NM") == borough))
@@ -101,11 +112,16 @@ def getBoroughData(
         .toPandas()
     )
 
+    # convert the date columns to datetime objects
     boroughCrimes.CMPLNT_FR = pd.to_datetime(boroughCrimes.CMPLNT_FR)
     boroughCrimes.CMPLNT_TO = pd.to_datetime(boroughCrimes.CMPLNT_TO)
+
+    # set the time of the report to 23:59:59
     boroughCrimes.RPT_DT = pd.to_datetime(boroughCrimes.RPT_DT) + dt.timedelta(
         hours=23, minutes=59, seconds=59
     )
+
+    # calculate the duration of the crime and the latency of the report
     boroughCrimes["CRIME_DURATION"] = boroughCrimes.CMPLNT_TO - boroughCrimes.CMPLNT_FR
     boroughCrimes["REPORT_LATENCY"] = boroughCrimes.RPT_DT - boroughCrimes.CMPLNT_FR
     return boroughCrimes
@@ -114,6 +130,16 @@ def getBoroughData(
 def getPrecinctData(
     sdf: PySparkDataFrame, precinct: int = 75, choosenYear: int = 2021
 ) -> pd.DataFrame:
+    """Returns a DataFrame with the crimes for a specific precinct
+
+    Args:
+        sdf (PySparkDataFrame): The Spark DataFrame to use
+        precinct (int, optional): The precinct. Defaults to 75.
+        choosenYear (int, optional): The year. Defaults to 2021.
+
+    Returns:
+        pd.DataFrame: A DataFrame with the crimes for a specific precinct
+    """
     precinctColumns = [
         "ADDR_PCT_CD",
         "CMPLNT_FR",
@@ -123,6 +149,8 @@ def getPrecinctData(
         "PD_DESC",
         "LAW_CAT_CD",
     ]
+
+    # get the crimes for the specific precinct
     precinctCrimes = (
         sdf.select(precinctColumns)
         .filter((year("CMPLNT_FR") == choosenYear) & (col("ADDR_PCT_CD") == precinct))
@@ -130,11 +158,14 @@ def getPrecinctData(
         .toPandas()
     )
 
+    # convert the date columns to datetime objects
     precinctCrimes.CMPLNT_FR = pd.to_datetime(precinctCrimes.CMPLNT_FR)
     precinctCrimes.CMPLNT_TO = pd.to_datetime(precinctCrimes.CMPLNT_TO)
     precinctCrimes.RPT_DT = pd.to_datetime(precinctCrimes.RPT_DT) + dt.timedelta(
         hours=23, minutes=59, seconds=59
     )
+
+    # calculate the duration of the crime and the latency of the report
     precinctCrimes["CRIME_DURATION"] = (
         precinctCrimes.CMPLNT_TO - precinctCrimes.CMPLNT_FR
     )
@@ -146,6 +177,14 @@ def getPrecinctData(
 def splitCrimeToInsideOutside(
     _sdf: PySparkDataFrame,
 ) -> Tuple[PySparkDataFrame, PySparkDataFrame, pd.DataFrame, pd.DataFrame]:
+    """Splits the crime data into inside and outside crimes
+
+    Args:
+        _sdf (PySparkDataFrame): The Spark DataFrame to use
+
+    Returns:
+        Tuple[PySparkDataFrame, PySparkDataFrame, pd.DataFrame, pd.DataFrame]: A tuple with the outside and inside crimes
+    """
     outsideCrimes = (
         _sdf.select(
             "LOC_OF_OCCUR_DESC",
@@ -180,6 +219,14 @@ def splitCrimeToInsideOutside(
 
 @st.cache_data
 def getTypesOfCrimes(_sdf: PySparkDataFrame) -> pd.DataFrame:
+    """Returns a DataFrame with the types of crimes
+
+    Args:
+        _sdf (PySparkDataFrame): The Spark DataFrame to use
+
+    Returns:
+        pd.DataFrame: A DataFrame with the types of crimes
+    """
     typesOfCrimes = (
         _sdf.filter((col("LOC_OF_OCCUR_DESC") != "INSIDE"))
         .select("OFNS_DESC")

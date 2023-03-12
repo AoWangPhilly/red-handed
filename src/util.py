@@ -15,6 +15,14 @@ def initializeSpark() -> Tuple[SparkSession, SparkContext]:
 
 
 def convert_to_am_pm(hour: int) -> str:
+    """Converts a 24-hour time to AM/PM
+
+    Args:
+        hour (int): The hour to convert
+
+    Returns:
+        str: The hour in AM/PM format
+    """
     if hour == 0:
         return "12 AM"
     elif 1 <= hour <= 11:

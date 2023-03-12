@@ -157,6 +157,15 @@ def plotCrimesVsTemp(crime: str, weatherDF: pd.DataFrame, outsideCrimes: pd.Data
 
 
 def compareCrimeRateAndTemperature(weatherData: pd.DataFrame, crimeData: pd.DataFrame):
+    """Compare the crime rate and temperature
+
+    Args:
+        weatherData (pd.DataFrame): the weather data
+        crimeData (pd.DataFrame): the crime data
+
+    Returns:
+        plotly.graph_objects.Figure: The plotly figure
+    """
     fig = make_subplots(
         rows=2,
         cols=1,
@@ -202,6 +211,15 @@ def compareCrimeRateAndTemperature(weatherData: pd.DataFrame, crimeData: pd.Data
 
 
 def getTopNCrimePlot(df: pd.DataFrame, n: int = 10):
+    """Get the top n crimes in a borough or precinct
+
+    Args:
+        df (pd.DataFrame): The crime data
+        n (int, optional): Defaults to 10.
+
+    Returns:
+         plotly.graph_objects.Figure: The plotly figure
+    """
     try:
         title = f"Top {n} Crimes in {df.BORO_NM.iloc[0].title()}"
     except Exception:
@@ -226,6 +244,14 @@ def getTopNCrimePlot(df: pd.DataFrame, n: int = 10):
 
 
 def crimeFrequencySubplot(df: pd.DataFrame):
+    """Create a subplot of the crime frequency
+
+    Args:
+        df (pd.DataFrame): The crime data
+
+    Returns:
+         plotly.graph_objects.Figure: The plotly figure
+    """
     fig = make_subplots(
         rows=2,
         cols=2,
@@ -352,6 +378,14 @@ def crimeFrequencySubplot(df: pd.DataFrame):
 
 
 def crimeDurationAndReportLatency(df: pd.DataFrame):
+    """Create a subplot of the crime duration and report latency
+
+    Args:
+        df (pd.DataFrame): The crime data
+
+    Returns:
+        plotly.graph_objects.Figure: The plotly figure
+    """
     fig = make_subplots(
         rows=2, cols=1, subplot_titles=("Crime Duration", "Report Crime Latency")
     )
